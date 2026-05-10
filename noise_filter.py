@@ -764,3 +764,4 @@ if __name__ == '__main__':
     METHOD  = sys.argv[3] if len(sys.argv) > 3 else 'combined'
     results = run_pipeline(DATASET, OUTDIR, method=METHOD)
     print(f"Çıktılar '{OUTDIR}' klasörüne kaydedildi.")
+
