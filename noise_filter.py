@@ -323,17 +323,17 @@ def adaptive_noise_filter(noisy_signal, sample_rate,
 
     elif method == 'wiener':
         filtered = wiener_filter(x, noise_power, frame_len, hop,
-                                  floor_gain=0.05, alpha=1.0)
+                                  floor_gain=0.01, alpha=1.0)
 
     elif method == 'combined':
         # 1) Çok düşük frekans temizliği
         s1 = apply_sos(design_hp(20.0, sample_rate, order=2), x)
         # 2) Wiener filtre
         s2 = wiener_filter(s1, noise_power, frame_len, hop,
-                            floor_gain=0.05, alpha=1.0)
+                            floor_gain=0.01, alpha=1.0)
         # 3) Spektral çıkarma
         s3 = spectral_subtraction(s2, noise_power, frame_len, hop,
-                                   alpha=1.5, beta=0.05)
+                                   alpha=1.0, beta=0.05)
         # 4) LP filtre
         filtered = apply_sos(design_lp(lp_cutoff, sample_rate, order=2), s3)
 
@@ -344,10 +344,7 @@ def adaptive_noise_filter(noisy_signal, sample_rate,
     filtered = filtered[:N]
     # Temiz sinyalin peak'ini koru, gürültülü sinyalininkini değil
 
-    max_clean = np.abs(known_noise).max() if known_noise is not None else np.abs(x).max()
-    max_out = np.abs(filtered).max()
-    if max_out > 1e-8:
-        filtered = filtered / max_out * min(max_clean, 1.0)
+    filtered = np.clip(filtered, -1.0, 1.0)
     return filtered
 
 
